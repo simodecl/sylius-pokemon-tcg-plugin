@@ -1,0 +1,90 @@
+parameters:
+    simo_decl_pokemon_tcg.api_language: 'en'
+    simo_decl_pokemon_tcg.card_languages: ['en']
+    simo_decl_pokemon_tcg.root_taxon_code: 'pokemon-tcg'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    # API Client
+    SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient:
+        arguments:
+            $defaultLanguage: '%simo_decl_pokemon_tcg.api_language%'
+
+    # Services
+    SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+            $taxonRepository: '@sylius.repository.taxon'
+            $taxonFactory: '@sylius.factory.taxon'
+            $slugGenerator: '@sylius.generator.taxon_slug'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $rootTaxonCode: '%simo_decl_pokemon_tcg.root_taxon_code%'
+            $defaultLocale: '%locale%'
+
+    SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+            $taxonomyImporter: '@SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter'
+            $productRepository: '@sylius.repository.product'
+            $productFactory: '@sylius.factory.product'
+            $productVariantFactory: '@sylius.factory.product_variant'
+            $productTaxonFactory: '@sylius.factory.product_taxon'
+            $channelPricingFactory: '@sylius.factory.channel_pricing'
+            $productOptionRepository: '@sylius.repository.product_option'
+            $productOptionValueRepository: '@sylius.repository.product_option_value'
+            $channelRepository: '@sylius.repository.channel'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $defaultLocale: '%locale%'
+            $cardLanguages: '%simo_decl_pokemon_tcg.card_languages%'
+
+    SimoDecl\SyliusPokemonTcgPlugin\Service\SealedProductCreator:
+        arguments:
+            $taxonomyImporter: '@SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter'
+            $productRepository: '@sylius.repository.product'
+            $productFactory: '@sylius.factory.product'
+            $productVariantFactory: '@sylius.factory.product_variant'
+            $productTaxonFactory: '@sylius.factory.product_taxon'
+            $channelPricingFactory: '@sylius.factory.channel_pricing'
+            $channelRepository: '@sylius.repository.channel'
+            $taxonRepository: '@sylius.repository.taxon'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $defaultLocale: '%locale%'
+            $rootTaxonCode: '%simo_decl_pokemon_tcg.root_taxon_code%'
+
+    # Controllers
+    SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\DashboardController:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+        tags: ['controller.service_arguments']
+
+    SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+            $taxonomyImporter: '@SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter'
+            $cardProductCreator: '@SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator'
+        tags: ['controller.service_arguments']
+
+    SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\CardSearchController:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+            $cardProductCreator: '@SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator'
+        tags: ['controller.service_arguments']
+
+    SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\SealedProductController:
+        arguments:
+            $tcgdexClient: '@SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient'
+            $sealedProductCreator: '@SimoDecl\SyliusPokemonTcgPlugin\Service\SealedProductCreator'
+        tags: ['controller.service_arguments']
+
+    # Menu
+    SimoDecl\SyliusPokemonTcgPlugin\Menu\AdminMenuListener:
+        tags:
+            - { name: kernel.event_listener, event: sylius.menu.admin.main, method: addAdminMenuItems }
+
+    # Form Types
+    SimoDecl\SyliusPokemonTcgPlugin\Form\Type\SealedProductType:
+        tags: ['form.type']

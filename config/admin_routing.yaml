@@ -1,0 +1,60 @@
+# Pokemon TCG Admin Routes
+
+simo_decl_pokemon_tcg_admin_dashboard:
+    path: /pokemon-tcg
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\DashboardController::indexAction
+
+# Import Taxonomies
+simo_decl_pokemon_tcg_admin_import_taxonomies:
+    path: /pokemon-tcg/import
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController::taxonomiesAction
+    methods: [GET]
+
+simo_decl_pokemon_tcg_admin_import_all_taxonomies:
+    path: /pokemon-tcg/import/all
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController::importAllTaxonomiesAction
+    methods: [POST]
+
+simo_decl_pokemon_tcg_admin_import_serie:
+    path: /pokemon-tcg/import/serie/{serieId}
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController::importSerieAction
+    methods: [POST]
+
+simo_decl_pokemon_tcg_admin_import_set_cards:
+    path: /pokemon-tcg/import/set/{setId}/cards
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController::importSetCardsAction
+    methods: [POST]
+
+# Card Search
+simo_decl_pokemon_tcg_admin_card_search:
+    path: /pokemon-tcg/cards
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\CardSearchController::searchAction
+    methods: [GET]
+
+simo_decl_pokemon_tcg_admin_card_view:
+    path: /pokemon-tcg/cards/{cardId}
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\CardSearchController::viewCardAction
+    methods: [GET]
+    requirements:
+        cardId: '.+'
+
+simo_decl_pokemon_tcg_admin_create_product_from_card:
+    path: /pokemon-tcg/cards/{cardId}/create-product
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\CardSearchController::createProductFromCardAction
+    methods: [POST]
+    requirements:
+        cardId: '.+'
+
+# Sealed Products
+simo_decl_pokemon_tcg_admin_sealed_product_create:
+    path: /pokemon-tcg/sealed-products/create
+    defaults:
+        _controller: SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\SealedProductController::createAction

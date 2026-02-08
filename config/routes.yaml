@@ -1,0 +1,3 @@
+simo_decl_pokemon_tcg_admin:
+    resource: "@SimoDeclSyliusPokemonTcgPlugin/config/admin_routing.yaml"
+    prefix: /admin

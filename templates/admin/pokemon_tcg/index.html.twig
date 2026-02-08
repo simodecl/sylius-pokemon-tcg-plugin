@@ -1,0 +1,86 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block title %}Pokemon TCG - Dashboard{% endblock %}
+
+{% block content %}
+<div class="ui segment">
+    <h1 class="ui header">
+        <i class="gamepad icon"></i>
+        <div class="content">
+            Pokemon TCG Manager
+            <div class="sub header">Manage your Pokemon Trading Card Game catalog</div>
+        </div>
+    </h1>
+</div>
+
+<div class="ui three stackable cards">
+    <div class="card">
+        <div class="content">
+            <div class="header">
+                <i class="download icon"></i>
+                Import Categories
+            </div>
+            <div class="description">
+                <p>Import Pokemon TCG series and sets from TCGdex as product categories (taxons).</p>
+                <p>This creates a tree structure: <strong>Pokemon TCG &rarr; Series &rarr; Sets</strong></p>
+            </div>
+        </div>
+        <a class="ui bottom attached button" href="{{ path('simo_decl_pokemon_tcg_admin_import_taxonomies') }}">
+            <i class="download icon"></i>
+            Go to Import
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="content">
+            <div class="header">
+                <i class="search icon"></i>
+                Search Cards
+            </div>
+            <div class="description">
+                <p>Search the TCGdex database for Pokemon cards and create products from them.</p>
+                <p>Cards are automatically linked to their set category with language variants.</p>
+            </div>
+        </div>
+        <a class="ui bottom attached button" href="{{ path('simo_decl_pokemon_tcg_admin_card_search') }}">
+            <i class="search icon"></i>
+            Search Cards
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="content">
+            <div class="header">
+                <i class="box icon"></i>
+                Sealed Products
+            </div>
+            <div class="description">
+                <p>Add sealed products like booster packs, booster boxes, elite trainer boxes, and more.</p>
+                <p>Link them to a set and categorize by product type.</p>
+            </div>
+        </div>
+        <a class="ui bottom attached button" href="{{ path('simo_decl_pokemon_tcg_admin_sealed_product_create') }}">
+            <i class="box icon"></i>
+            Add Sealed Product
+        </a>
+    </div>
+</div>
+
+<div class="ui segment">
+    <h3 class="ui header">Quick Start Guide</h3>
+    <div class="ui ordered list">
+        <div class="item">
+            <strong>Import categories</strong> - Click "Import Categories" to pull in all Pokemon TCG series and sets from TCGdex. This creates the category tree your products will be organized under.
+        </div>
+        <div class="item">
+            <strong>Search &amp; add cards</strong> - Use "Search Cards" to find specific cards in the TCGdex database. Click on a card to create a product from it, complete with set categorization and language variants.
+        </div>
+        <div class="item">
+            <strong>Add sealed products</strong> - Use "Sealed Products" to add booster boxes, packs, tins, and other sealed items to your catalog.
+        </div>
+        <div class="item">
+            <strong>Set prices &amp; stock</strong> - After creating products, edit them in the regular Sylius product management to set your prices and stock levels per variant/language.
+        </div>
+    </div>
+</div>
+{% endblock %}
