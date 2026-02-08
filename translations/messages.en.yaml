@@ -1,0 +1,15 @@
+simo_decl_pokemon_tcg:
+    ui:
+        menu:
+            pokemon_tcg: "Pokemon TCG"
+            dashboard: "Dashboard"
+            import_taxonomies: "Import Categories"
+            card_search: "Search Cards"
+            sealed_products: "Sealed Products"
+    form:
+        sealed_product:
+            name: "Product Name"
+            type: "Product Type"
+            set: "Set ID (TCGdex)"
+            price: "Price"
+            description: "Description"

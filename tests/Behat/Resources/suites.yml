@@ -1,0 +1,9 @@
+# Put your Behat suites definitions here
+
+default:
+    suites:
+        pokemon_tcg:
+            contexts: []
+
+            filters:
+                tags: "@pokemon_tcg"

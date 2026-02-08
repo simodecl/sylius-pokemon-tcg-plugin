@@ -1,0 +1,91 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block title %}Pokemon TCG - Add Sealed Product{% endblock %}
+
+{% block content %}
+<div class="ui segment">
+    <h1 class="ui header">
+        <i class="box icon"></i>
+        <div class="content">
+            Add Sealed Product
+            <div class="sub header">Create a sealed Pokemon TCG product (booster boxes, packs, tins, etc.)</div>
+        </div>
+    </h1>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="ui positive message">
+        <i class="close icon"></i>
+        <p>{{ message }}</p>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="ui negative message">
+        <i class="close icon"></i>
+        <p>{{ message }}</p>
+    </div>
+{% endfor %}
+
+<div class="ui segment">
+    {{ form_start(form, {'attr': {'class': 'ui form'}}) }}
+
+    <div class="field">
+        {{ form_label(form.name) }}
+        {{ form_widget(form.name, {'attr': {'placeholder': 'e.g., Obsidian Flames Booster Box'}}) }}
+        {{ form_errors(form.name) }}
+    </div>
+
+    <div class="two fields">
+        <div class="field">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="field">
+            {{ form_label(form.set_id) }}
+            {{ form_widget(form.set_id) }}
+            {{ form_errors(form.set_id) }}
+            <div class="ui info message" style="margin-top: 4px; padding: 8px;">
+                <small>Enter the TCGdex set ID. You can find set IDs on the <a href="{{ path('simo_decl_pokemon_tcg_admin_import_taxonomies') }}">Import Categories</a> page.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        {{ form_label(form.price) }}
+        <div class="ui labeled input">
+            {{ form_widget(form.price) }}
+        </div>
+        {{ form_errors(form.price) }}
+    </div>
+
+    <div class="field">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description) }}
+        {{ form_errors(form.description) }}
+    </div>
+
+    <button type="submit" class="ui primary button">
+        <i class="plus icon"></i>
+        Create Sealed Product
+    </button>
+
+    {{ form_end(form) }}
+</div>
+
+<div class="ui segment">
+    <h3 class="ui header">Common Sealed Product Types</h3>
+    <div class="ui list">
+        {% for typeKey, typeLabel in productTypes %}
+            <div class="item">
+                <i class="box icon"></i>
+                <div class="content">
+                    <strong>{{ typeLabel }}</strong>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

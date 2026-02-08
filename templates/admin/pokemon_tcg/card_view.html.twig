@@ -1,0 +1,137 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block title %}Pokemon TCG - {{ card.name }}{% endblock %}
+
+{% block content %}
+<div class="ui segment">
+    <a href="{{ path('simo_decl_pokemon_tcg_admin_card_search') }}" class="ui labeled icon button">
+        <i class="left arrow icon"></i>
+        Back to Search
+    </a>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="ui positive message">
+        <i class="close icon"></i>
+        <p>{{ message }}</p>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="ui negative message">
+        <i class="close icon"></i>
+        <p>{{ message }}</p>
+    </div>
+{% endfor %}
+
+<div class="ui grid">
+    <div class="six wide column">
+        {% if card.image is defined and card.image %}
+            <div class="ui segment">
+                <img src="{{ card.image }}/high.png" alt="{{ card.name }}" class="ui fluid image">
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="ten wide column">
+        <div class="ui segment">
+            <h1 class="ui header">
+                {{ card.name }}
+                <div class="sub header">{{ card.id }}</div>
+            </h1>
+
+            <table class="ui definition table">
+                <tbody>
+                    {% if card.set is defined and card.set %}
+                        <tr>
+                            <td class="four wide">Set</td>
+                            <td>{{ card.set.name }} ({{ card.set.id }})</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.localId is defined %}
+                        <tr>
+                            <td>Card Number</td>
+                            <td>{{ card.localId }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.rarity is defined %}
+                        <tr>
+                            <td>Rarity</td>
+                            <td>{{ card.rarity }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.category is defined %}
+                        <tr>
+                            <td>Category</td>
+                            <td>{{ card.category }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.hp is defined %}
+                        <tr>
+                            <td>HP</td>
+                            <td>{{ card.hp }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.types is defined and card.types %}
+                        <tr>
+                            <td>Types</td>
+                            <td>{{ card.types|join(', ') }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.stage is defined %}
+                        <tr>
+                            <td>Stage</td>
+                            <td>{{ card.stage }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.illustrator is defined %}
+                        <tr>
+                            <td>Illustrator</td>
+                            <td>{{ card.illustrator }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if card.variants is defined and card.variants %}
+                        <tr>
+                            <td>Variants</td>
+                            <td>
+                                {% for variant, available in card.variants %}
+                                    {% if available %}
+                                        <span class="ui label">{{ variant }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            {% if card.description is defined and card.description %}
+                <div class="ui segment">
+                    <h4>Card Text</h4>
+                    <p>{{ card.description }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="ui segment">
+            <h3 class="ui header">Create Product</h3>
+            <p>Create a Sylius product from this card. It will be linked to the set category and have variants for each configured card language.</p>
+
+            <form method="post" action="{{ path('simo_decl_pokemon_tcg_admin_create_product_from_card', {cardId: card.id}) }}" class="ui form">
+                <input type="hidden" name="_token" value="{{ csrf_token('pokemon_tcg_create_product') }}">
+                <div class="field">
+                    <label>Default price (in cents, optional)</label>
+                    <div class="ui labeled input">
+                        <input type="number" name="default_price" placeholder="e.g., 499 for $4.99" min="0">
+                        <div class="ui label">cents</div>
+                    </div>
+                </div>
+                <button type="submit" class="ui primary button">
+                    <i class="plus icon"></i>
+                    Create Product
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
