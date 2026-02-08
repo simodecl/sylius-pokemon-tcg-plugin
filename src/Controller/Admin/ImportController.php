@@ -20,9 +20,6 @@ final class ImportController extends AbstractController
     ) {
     }
 
-    /**
-     * Show the import taxonomies page with all available series.
-     */
     public function taxonomiesAction(): Response
     {
         $series = $this->tcgdexClient->fetchSeries();
@@ -32,9 +29,6 @@ final class ImportController extends AbstractController
         ]);
     }
 
-    /**
-     * Import all series and sets as taxons.
-     */
     public function importAllTaxonomiesAction(Request $request): Response
     {
         try {
@@ -51,9 +45,6 @@ final class ImportController extends AbstractController
         return $this->redirectToRoute('simo_decl_pokemon_tcg_admin_import_taxonomies');
     }
 
-    /**
-     * Import a single series and its sets.
-     */
     public function importSerieAction(Request $request, string $serieId): Response
     {
         try {
@@ -70,9 +61,6 @@ final class ImportController extends AbstractController
         return $this->redirectToRoute('simo_decl_pokemon_tcg_admin_import_taxonomies');
     }
 
-    /**
-     * Import all cards from a set as products.
-     */
     public function importSetCardsAction(Request $request, string $setId): Response
     {
         $defaultPrice = $request->request->getInt('default_price', 0);

@@ -25,12 +25,19 @@ use Sylius\Component\Resource\Repository\RepositoryInterface;
 final class SealedProductCreator
 {
     public const TYPE_BOOSTER_PACK = 'booster_pack';
+
     public const TYPE_BOOSTER_BOX = 'booster_box';
+
     public const TYPE_ELITE_TRAINER_BOX = 'elite_trainer_box';
+
     public const TYPE_COLLECTION_BOX = 'collection_box';
+
     public const TYPE_TIN = 'tin';
+
     public const TYPE_BLISTER = 'blister';
+
     public const TYPE_BUNDLE = 'bundle';
+
     public const TYPE_OTHER = 'other';
 
     public const PRODUCT_TYPES = [
@@ -61,12 +68,6 @@ final class SealedProductCreator
 
     /**
      * Create a sealed product.
-     *
-     * @param string      $name          Product name (e.g., "Obsidian Flames Booster Box")
-     * @param string      $type          Product type (one of the TYPE_ constants)
-     * @param string|null $setId         Optional TCGdex set ID to link to
-     * @param int|null    $priceCents    Price in cents
-     * @param string|null $description   Product description
      */
     public function create(
         string $name,
@@ -75,16 +76,15 @@ final class SealedProductCreator
         ?int $priceCents = null,
         ?string $description = null,
     ): ProductInterface {
-        /** @var ProductInterface $product */
-        $product = $this->productFactory->createNew();
-
         $code = $this->generateCode($name, $type, $setId);
 
-        // Check if already exists
         $existing = $this->productRepository->findOneBy(['code' => $code]);
         if ($existing !== null) {
             return $existing;
         }
+
+        /** @var ProductInterface $product */
+        $product = $this->productFactory->createNew();
 
         $product->setCode($code);
         $product->setCurrentLocale($this->defaultLocale);
@@ -96,18 +96,12 @@ final class SealedProductCreator
         $product->setShortDescription($typeLabel);
         $product->setDescription($description ?? sprintf('%s - %s', $name, $typeLabel));
 
-        // Link to set taxon if provided
         if ($setId !== null) {
             $this->linkToSetTaxon($product, $setId);
         }
 
-        // Link to sealed products taxon
         $this->linkToSealedTaxon($product);
-
-        // Create a single variant (sealed products don't need language variants)
         $this->createDefaultVariant($product, $priceCents);
-
-        // Enable for all channels
         $this->enableForAllChannels($product);
 
         $this->entityManager->persist($product);
@@ -120,7 +114,6 @@ final class SealedProductCreator
     {
         $setTaxon = $this->taxonomyImporter->findSetTaxon($setId);
         if ($setTaxon === null) {
-            // Try to import it
             try {
                 $setTaxon = $this->taxonomyImporter->importSet($setId);
             } catch (\RuntimeException) {
@@ -142,7 +135,6 @@ final class SealedProductCreator
         $sealedTaxon = $this->taxonRepository->findOneBy(['code' => $sealedTaxonCode]);
 
         if ($sealedTaxon === null) {
-            // Create the "Sealed Products" taxon under the root
             $rootTaxon = $this->taxonRepository->findOneBy(['code' => $this->rootTaxonCode]);
             if ($rootTaxon === null) {
                 return;
@@ -202,17 +194,18 @@ final class SealedProductCreator
 
     private function generateCode(string $name, string $type, ?string $setId): string
     {
-        $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $name));
+        $slug = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $name));
 
-        return sprintf('ptcg-sealed-%s-%s%s',
+        return sprintf(
+            'ptcg-sealed-%s-%s%s',
             $type,
-            $setId ? $setId . '-' : '',
+            $setId !== null ? $setId . '-' : '',
             substr($slug, 0, 40),
         );
     }
 
     private function generateSlug(string $code): string
     {
-        return strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $code));
+        return strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $code));
     }
 }

@@ -19,9 +19,6 @@ final class SealedProductController extends AbstractController
     ) {
     }
 
-    /**
-     * Show the sealed product creation form.
-     */
     public function createAction(Request $request): Response
     {
         $form = $this->createForm(SealedProductType::class);

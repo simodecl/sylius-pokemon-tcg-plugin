@@ -18,9 +18,6 @@ final class CardSearchController extends AbstractController
     ) {
     }
 
-    /**
-     * Show the card search page.
-     */
     public function searchAction(Request $request): Response
     {
         $query = $request->query->getString('q', '');
@@ -34,7 +31,6 @@ final class CardSearchController extends AbstractController
             $cards = $setData['cards'] ?? [];
         }
 
-        // Fetch sets for the filter dropdown
         $sets = $this->tcgdexClient->fetchSets();
 
         return $this->render('@SimoDeclSyliusPokemonTcgPlugin/admin/pokemon_tcg/card_search.html.twig', [
@@ -45,9 +41,6 @@ final class CardSearchController extends AbstractController
         ]);
     }
 
-    /**
-     * View a single card's details from the API.
-     */
     public function viewCardAction(string $cardId): Response
     {
         $cardData = $this->tcgdexClient->fetchCard($cardId);
@@ -62,9 +55,6 @@ final class CardSearchController extends AbstractController
         ]);
     }
 
-    /**
-     * Create a product from a card.
-     */
     public function createProductFromCardAction(Request $request, string $cardId): Response
     {
         $defaultPrice = $request->request->getInt('default_price', 0);

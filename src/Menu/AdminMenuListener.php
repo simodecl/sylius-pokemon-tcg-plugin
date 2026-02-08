@@ -6,9 +6,6 @@ namespace SimoDecl\SyliusPokemonTcgPlugin\Menu;
 
 use Sylius\Bundle\UiBundle\Menu\Event\MenuBuilderEvent;
 
-/**
- * Adds the "Pokemon TCG" section to the Sylius admin sidebar menu.
- */
 final class AdminMenuListener
 {
     public function addAdminMenuItems(MenuBuilderEvent $event): void

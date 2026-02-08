@@ -1,7 +1,21 @@
 /vendor/
+/var/
 /node_modules/
-/.idea/
-/.vscode/
-composer.lock
+/drivers/
+/composer.lock
+
+/etc/build/*
+!/etc/build/.gitignore
+
+/.phpunit.result.cache
+/behat.yml
+/phpunit.xml
+/compose.override.yml
 .phpunit.result.cache
-.php-cs-fixer.cache
+
+# Symfony CLI https://symfony.com/doc/current/setup/symfony_server.html#different-php-settings-per-project
+/.php-version
+/php.ini
+
+/tests/TestApplication/.env.local
+/tests/TestApplication/.env.*.local

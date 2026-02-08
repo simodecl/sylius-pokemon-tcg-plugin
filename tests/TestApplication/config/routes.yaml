@@ -1,0 +1,5 @@
+simo_decl_sylius_pokemon_tcg_admin:
+    resource: "@SimoDeclSyliusPokemonTcgPlugin/config/routes/admin.yaml"
+
+simo_decl_sylius_pokemon_tcg_shop:
+    resource: "@SimoDeclSyliusPokemonTcgPlugin/config/routes/shop.yaml"

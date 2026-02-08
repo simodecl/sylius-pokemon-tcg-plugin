@@ -18,7 +18,6 @@ use Sylius\Component\Taxonomy\Generator\TaxonSlugGeneratorInterface;
  *   Pokemon TCG (root)
  *   ├── Scarlet & Violet (series)
  *   │   ├── Obsidian Flames (set)
- *   │   ├── Paldea Evolved (set)
  *   │   └── ...
  *   ├── Sword & Shield (series)
  *   │   ├── Darkness Ablaze (set)
@@ -112,9 +111,7 @@ final class TaxonomyImporter
             throw new \RuntimeException(sprintf('Set "%s" not found in TCGdex API.', $setId));
         }
 
-        // Ensure the parent series taxon exists
         $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $fullSet['serie']);
-
         $setTaxon = $this->getOrCreateSetTaxon($serieTaxon, $fullSet);
 
         $this->entityManager->flush();

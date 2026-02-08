@@ -11,7 +11,6 @@ use Sylius\Component\Core\Model\ChannelPricingInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductTaxonInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
-use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Core\Repository\ProductRepositoryInterface;
 use Sylius\Component\Product\Model\ProductOptionInterface;
 use Sylius\Component\Product\Model\ProductOptionValueInterface;
@@ -25,7 +24,7 @@ use Sylius\Component\Resource\Repository\RepositoryInterface;
  * - Name: card name + set name + card number
  * - Variants: one per card language the seller offers
  * - Taxon: linked to the card's set (and therefore series)
- * - Attributes: rarity, illustrator, type, HP, etc.
+ * - Description: rarity, illustrator, type, HP, etc.
  */
 final class CardProductCreator
 {
@@ -87,12 +86,14 @@ final class CardProductCreator
             $existingCode = $this->makeProductCode($fullCardId);
             if ($this->productRepository->findOneBy(['code' => $existingCode]) !== null) {
                 $skipped++;
+
                 continue;
             }
 
             $cardData = $this->tcgdexClient->fetchCard($fullCardId);
             if ($cardData === null) {
                 $skipped++;
+
                 continue;
             }
 
@@ -127,12 +128,9 @@ final class CardProductCreator
         $product->setName(sprintf('%s (%s %s)', $cardName, $setName, $localId));
 
         $product->setSlug($this->generateSlug($code));
-
-        // Build description from card data
         $product->setDescription($this->buildCardDescription($cardData));
         $product->setShortDescription($this->buildShortDescription($cardData));
 
-        // Link to set taxon
         $this->linkToSetTaxon($product, $cardData);
 
         // Ensure the card language option exists and link it
@@ -144,7 +142,6 @@ final class CardProductCreator
             $this->createLanguageVariant($product, $languageOption, $language, $defaultPriceCents);
         }
 
-        // Enable for all channels
         $this->enableForAllChannels($product);
 
         $this->entityManager->persist($product);
@@ -161,7 +158,6 @@ final class CardProductCreator
 
         $setTaxon = $this->taxonomyImporter->findSetTaxon($setId);
         if ($setTaxon === null) {
-            // Auto-import the set if it doesn't exist yet
             $setTaxon = $this->taxonomyImporter->importSet($setId);
         }
 
@@ -226,6 +222,7 @@ final class CardProductCreator
         foreach ($languageOption->getValues() as $value) {
             if ($value->getCode() === $optionValueCode) {
                 $optionValue = $value;
+
                 break;
             }
         }
@@ -243,7 +240,6 @@ final class CardProductCreator
         $variant->setOnHand(0);
         $variant->setTracked(true);
 
-        // Set default pricing for all channels
         if ($defaultPriceCents !== null) {
             /** @var ChannelInterface $channel */
             foreach ($this->channelRepository->findAll() as $channel) {
@@ -300,7 +296,7 @@ final class CardProductCreator
             $meta[] = sprintf('Card Number: %s', $cardData['localId']);
         }
 
-        if (!empty($meta)) {
+        if ($meta !== []) {
             $parts[] = implode("\n", $meta);
         }
 
@@ -330,6 +326,6 @@ final class CardProductCreator
 
     private function generateSlug(string $code): string
     {
-        return strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $code));
+        return strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $code));
     }
 }

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container
+        xmlns="http://symfony.com/schema/dic/services"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"
+>
+    <imports>
+        <import resource="services/**" />
+    </imports>
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
+        <!-- API Client -->
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient">
+            <argument key="$defaultLanguage">%simo_decl_pokemon_tcg.api_language%</argument>
+        </service>
+
+        <!-- Services -->
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter">
+            <argument key="$tcgdexClient" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient" />
+            <argument key="$taxonRepository" type="service" id="sylius.repository.taxon" />
+            <argument key="$taxonFactory" type="service" id="sylius.factory.taxon" />
+            <argument key="$slugGenerator" type="service" id="sylius.generator.taxon_slug" />
+            <argument key="$entityManager" type="service" id="doctrine.orm.entity_manager" />
+            <argument key="$rootTaxonCode">%simo_decl_pokemon_tcg.root_taxon_code%</argument>
+            <argument key="$defaultLocale">%locale%</argument>
+        </service>
+
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator">
+            <argument key="$tcgdexClient" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient" />
+            <argument key="$taxonomyImporter" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter" />
+            <argument key="$productRepository" type="service" id="sylius.repository.product" />
+            <argument key="$productFactory" type="service" id="sylius.factory.product" />
+            <argument key="$productVariantFactory" type="service" id="sylius.factory.product_variant" />
+            <argument key="$productTaxonFactory" type="service" id="sylius.factory.product_taxon" />
+            <argument key="$channelPricingFactory" type="service" id="sylius.factory.channel_pricing" />
+            <argument key="$productOptionRepository" type="service" id="sylius.repository.product_option" />
+            <argument key="$productOptionValueRepository" type="service" id="sylius.repository.product_option_value" />
+            <argument key="$channelRepository" type="service" id="sylius.repository.channel" />
+            <argument key="$entityManager" type="service" id="doctrine.orm.entity_manager" />
+            <argument key="$defaultLocale">%locale%</argument>
+            <argument key="$cardLanguages">%simo_decl_pokemon_tcg.card_languages%</argument>
+        </service>
+
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Service\SealedProductCreator">
+            <argument key="$taxonomyImporter" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter" />
+            <argument key="$productRepository" type="service" id="sylius.repository.product" />
+            <argument key="$productFactory" type="service" id="sylius.factory.product" />
+            <argument key="$productVariantFactory" type="service" id="sylius.factory.product_variant" />
+            <argument key="$productTaxonFactory" type="service" id="sylius.factory.product_taxon" />
+            <argument key="$channelPricingFactory" type="service" id="sylius.factory.channel_pricing" />
+            <argument key="$channelRepository" type="service" id="sylius.repository.channel" />
+            <argument key="$taxonRepository" type="service" id="sylius.repository.taxon" />
+            <argument key="$entityManager" type="service" id="doctrine.orm.entity_manager" />
+            <argument key="$defaultLocale">%locale%</argument>
+            <argument key="$rootTaxonCode">%simo_decl_pokemon_tcg.root_taxon_code%</argument>
+        </service>
+
+        <!-- Controllers -->
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\DashboardController" public="true">
+            <tag name="controller.service_arguments" />
+        </service>
+
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\ImportController" public="true">
+            <argument key="$tcgdexClient" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient" />
+            <argument key="$taxonomyImporter" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\TaxonomyImporter" />
+            <argument key="$cardProductCreator" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator" />
+            <tag name="controller.service_arguments" />
+        </service>
+
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\CardSearchController" public="true">
+            <argument key="$tcgdexClient" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient" />
+            <argument key="$cardProductCreator" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\CardProductCreator" />
+            <tag name="controller.service_arguments" />
+        </service>
+
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Controller\Admin\SealedProductController" public="true">
+            <argument key="$tcgdexClient" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Api\TcgdexClient" />
+            <argument key="$sealedProductCreator" type="service" id="SimoDecl\SyliusPokemonTcgPlugin\Service\SealedProductCreator" />
+            <tag name="controller.service_arguments" />
+        </service>
+
+        <!-- Menu Listener -->
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Menu\AdminMenuListener">
+            <tag name="kernel.event_listener" event="sylius.menu.admin.main" method="addAdminMenuItems" />
+        </service>
+
+        <!-- Form Types -->
+        <service id="SimoDecl\SyliusPokemonTcgPlugin\Form\Type\SealedProductType">
+            <tag name="form.type" />
+        </service>
+    </services>
+</container>

@@ -14,8 +14,8 @@ Built for people who want to start their webshop to sell their Pokemon card coll
 
 ## Requirements
 
-- PHP 8.1+
-- Sylius 1.12+ or 2.0+
+- PHP 8.2+
+- Sylius 2.0+
 - Internet access (for TCGdex API calls)
 
 ## Installation
@@ -23,12 +23,12 @@ Built for people who want to start their webshop to sell their Pokemon card coll
 ### Step 1: Require the plugin via Composer
 
 ```bash
-composer require simodecl/sylius-pokemon-tcg-plugin
+composer require simo-decl/sylius-pokemon-tcg-plugin
 ```
 
-### Step 2: Register the plugin in your kernel
+### Step 2: Register the plugin
 
-Add the plugin to `config/bundles.php`:
+Add to `config/bundles.php`:
 
 ```php
 return [
@@ -42,13 +42,14 @@ return [
 Create `config/routes/simo_decl_sylius_pokemon_tcg.yaml`:
 
 ```yaml
-simo_decl_pokemon_tcg:
-    resource: "@SimoDeclSyliusPokemonTcgPlugin/config/routes.yaml"
+simo_decl_sylius_pokemon_tcg_admin:
+    resource: "@SimoDeclSyliusPokemonTcgPlugin/config/routes/admin.yaml"
+    prefix: /admin
 ```
 
 ### Step 4: Configure the plugin (optional)
 
-Create `config/packages/simo_decl_sylius_pokemon_tcg.yaml` to customize:
+Create `config/packages/simo_decl_sylius_pokemon_tcg.yaml`:
 
 ```yaml
 simo_decl_sylius_pokemon_tcg:
@@ -56,7 +57,6 @@ simo_decl_sylius_pokemon_tcg:
     api_language: en
 
     # Card print languages to offer as product variants
-    # Add the languages of the physical cards you sell
     card_languages:
         - en
         - ja
@@ -79,113 +79,72 @@ After installation, a new **Pokemon TCG** section appears in the Sylius admin si
 
 ### 1. Import Categories
 
-Go to **Pokemon TCG → Import Categories**. You can:
-- **Import All** — Imports every series and set from TCGdex in one go
+Go to **Pokemon TCG → Import Categories**:
+- **Import All** — Imports every series and set from TCGdex
 - **Import by Series** — Import individual series (e.g., just "Scarlet & Violet")
-
-This creates taxons (categories) organized as:
-```
-Pokemon TCG
-├── Scarlet & Violet
-│   ├── Obsidian Flames
-│   ├── Paldea Evolved
-│   └── ...
-├── Sword & Shield
-│   ├── Darkness Ablaze
-│   └── ...
-└── ...
-```
 
 ### 2. Search & Add Cards
 
 Go to **Pokemon TCG → Search Cards**:
-- Search by card name (e.g., "Charizard")
-- Browse by set using the dropdown
-- Click a card to view its details (rarity, type, HP, illustrator, etc.)
-- Click **Create Product** to add it to your catalog
-
-Each card product is:
-- Named with the card name, set, and number (e.g., "Charizard VMAX (Darkness Ablaze 020)")
-- Linked to its set taxon
-- Given variants for each configured card language
-- Ready for you to set prices and stock
+- Search by card name (e.g., "Charizard") or browse by set
+- Click a card to view its details and create a product
 
 ### 3. Add Sealed Products
 
 Go to **Pokemon TCG → Sealed Products**:
-- Enter a product name (e.g., "Obsidian Flames Booster Box")
-- Select the product type (Booster Pack, Booster Box, Elite Trainer Box, etc.)
-- Optionally link it to a set
-- Set a price and description
+- Create booster boxes, packs, tins, ETBs, etc.
+- Link to a set and set a price
 
-### 4. Set Prices & Stock
+### 4. Manage in Sylius
 
-After creating products through the plugin, manage them in the standard Sylius product management:
-- Set prices per channel and currency
-- Set stock levels per variant (per language for cards)
-- Add images, manage SEO fields, etc.
+After creating products, manage prices, stock, and images in the standard Sylius product management.
 
-## Architecture
+## Development
 
-### Directory Structure
+This plugin was scaffolded from [Sylius/PluginSkeleton](https://github.com/Sylius/PluginSkeleton).
 
-```
-src/
-├── Api/
-│   └── TcgdexClient.php              # TCGdex API wrapper
-├── Controller/Admin/
-│   ├── DashboardController.php        # Main plugin dashboard
-│   ├── ImportController.php           # Taxonomy import actions
-│   ├── CardSearchController.php       # Card search & product creation
-│   └── SealedProductController.php    # Sealed product creation
-├── DependencyInjection/
-│   ├── Configuration.php              # Bundle configuration
-│   └── SimoDeclSyliusPokemonTcgExtension.php
-├── Form/Type/
-│   └── SealedProductType.php          # Sealed product form
-├── Menu/
-│   └── AdminMenuListener.php          # Admin sidebar menu
-├── Service/
-│   ├── TaxonomyImporter.php           # Series/sets → taxon import
-│   ├── CardProductCreator.php         # Card → product creation
-│   └── SealedProductCreator.php       # Sealed product creation
-└── SimoDeclSyliusPokemonTcgPlugin.php # Bundle class
+### Setup
 
-config/
-├── services.yaml                      # Service definitions
-├── routes.yaml                        # Route loader
-└── admin_routing.yaml                 # Admin route definitions
+```bash
+# Install dependencies
+composer install
 
-templates/admin/pokemon_tcg/
-├── index.html.twig                    # Dashboard
-├── import_taxonomies.html.twig        # Import page
-├── card_search.html.twig              # Card search
-├── card_view.html.twig                # Card detail/create
-└── sealed_product.html.twig           # Sealed product form
+# Frontend (in test application)
+(cd vendor/sylius/test-application && yarn install && yarn build)
+vendor/bin/console assets:install
+
+# Database
+vendor/bin/console doctrine:database:create
+vendor/bin/console doctrine:migrations:migrate -n
+vendor/bin/console sylius:fixtures:load -n
 ```
 
-### How It Works
+### Docker
 
-- **TCGdex API**: The plugin uses the [TCGdex PHP SDK](https://github.com/tcgdex/php-sdk) to fetch Pokemon TCG data. TCGdex is a free, open-source API with data on 130k+ cards across 6+ languages.
-- **Taxons**: Series and sets are imported as Sylius taxons in a tree structure. Products are linked to their set taxon.
-- **Products**: Cards become products with a "Card Language" product option. Each configured language becomes a variant, so you can track stock per language.
-- **Sealed Products**: Created manually via a form and linked to set taxons plus a "Sealed Products" category.
+```bash
+cp compose.override.dist.yml compose.override.yml
+docker compose up -d
+```
 
-### Card Languages
+### Testing
 
-Pokemon TCG cards are printed in multiple languages. Japanese sets are separate from international sets in TCGdex. Within international sets, the same card exists in English, French, German, etc.
+```bash
+# PHPUnit
+vendor/bin/phpunit
 
-The `card_languages` config controls which language variants are created for each card product. If you only sell English cards, set `['en']`. If you sell English and Japanese, set `['en', 'ja']`.
+# Behat (non-JS)
+vendor/bin/behat --strict --tags="~@javascript&&~@mink:chromedriver"
+
+# PHPStan
+vendor/bin/phpstan analyse -c phpstan.neon -l max src/
+
+# Coding standards
+vendor/bin/ecs check
+```
 
 ## TCGdex API
 
-This plugin relies on the free [TCGdex API](https://tcgdex.dev/). TCGdex provides:
-- Card data: name, rarity, type, HP, illustrator, image, and more
-- Set data: name, card count, series grouping
-- Series data: grouping of sets
-- Multi-language support: en, fr, es, de, it, pt (and more coming)
-
-No API key is required. Please be respectful of their service.
+This plugin uses the free [TCGdex API](https://tcgdex.dev/) — no API key required. Please be respectful of their service.
 
 ## License
 

@@ -141,20 +141,4 @@ final class TcgdexClient
     {
         return $this->tcgdex->fetch('types') ?? [];
     }
-
-    /**
-     * Get the image URL for a card.
-     */
-    public function getCardImageUrl(string $cardId, string $quality = 'high'): string
-    {
-        return sprintf('https://assets.tcgdex.net/en/%s/%s.png', str_replace('-', '/', $cardId), $quality);
-    }
-
-    /**
-     * Get the image URL for a set logo.
-     */
-    public function getSetLogoUrl(string $setId): string
-    {
-        return sprintf('https://assets.tcgdex.net/en/%s/logo.png', $setId);
-    }
 }
