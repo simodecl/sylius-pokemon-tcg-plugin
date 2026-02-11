@@ -37,8 +37,9 @@ final class CardProductCreator
         private readonly FactoryInterface $productVariantFactory,
         private readonly FactoryInterface $productTaxonFactory,
         private readonly FactoryInterface $channelPricingFactory,
+        private readonly FactoryInterface $productOptionFactory,
+        private readonly FactoryInterface $productOptionValueFactory,
         private readonly RepositoryInterface $productOptionRepository,
-        private readonly RepositoryInterface $productOptionValueRepository,
         private readonly RepositoryInterface $channelRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly string $defaultLocale,
@@ -178,7 +179,7 @@ final class CardProductCreator
         }
 
         /** @var ProductOptionInterface $option */
-        $option = $this->productOptionRepository->createNew();
+        $option = $this->productOptionFactory->createNew();
         $option->setCode('ptcg_card_language');
         $option->setCurrentLocale($this->defaultLocale);
         $option->setFallbackLocale($this->defaultLocale);
@@ -199,7 +200,7 @@ final class CardProductCreator
 
         foreach ($this->cardLanguages as $lang) {
             /** @var ProductOptionValueInterface $value */
-            $value = $this->productOptionValueRepository->createNew();
+            $value = $this->productOptionValueFactory->createNew();
             $value->setCode(sprintf('ptcg_lang_%s', $lang));
             $value->setCurrentLocale($this->defaultLocale);
             $value->setFallbackLocale($this->defaultLocale);

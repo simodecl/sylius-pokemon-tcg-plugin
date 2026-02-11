@@ -2,7 +2,7 @@
 
 {% block title %}Pokemon TCG - Search Cards{% endblock %}
 
-{% block body %}
+{% block content %}
 <div class="container-fluid py-3">
     <h1 class="mb-1">Search Pokemon Cards</h1>
     <p class="text-muted">Search TCGdex for cards and create products</p>
@@ -52,23 +52,30 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Results ({{ cards|length }} cards found)</h5>
-                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
                     {% for card in cards %}
                         <div class="col">
                             <div class="card h-100">
-                                {% if card.image %}
+                                {% set cardImage = card.image is defined ? card.image : null %}
+                                {% if cardImage %}
                                     <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}">
-                                        <img src="{{ card.image }}/low.png" alt="{{ card.name }}" class="card-img-top" loading="lazy">
+                                        <img src="{{ cardImage }}/low.png" alt="{{ card.name }}" class="card-img-top" style="max-height: 180px; object-fit: contain;" loading="lazy">
                                     </a>
                                 {% endif %}
                                 <div class="card-body p-2">
                                     <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="text-decoration-none">
-                                        <strong>{{ card.name }}</strong>
+                                        <strong style="font-size: 0.85rem;">{{ card.name }}</strong>
                                     </a>
-                                    <br><small class="text-muted"><code>{{ card.id }}</code></small>
+                                    <br><small class="text-muted"><code style="font-size: 0.7rem;">{{ card.id }}</code></small>
                                 </div>
                                 <div class="card-footer p-2">
-                                    <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="btn btn-sm btn-outline-primary w-100">View Details</a>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="btn btn-sm btn-outline-secondary flex-grow-1">Details</a>
+                                        <form method="post" action="{{ path('simo_decl_pokemon_tcg_admin_create_product_from_card', {cardId: card.id}) }}" class="flex-grow-1">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('pokemon_tcg_create_product') }}">
+                                            <button type="submit" class="btn btn-sm btn-primary w-100">Add</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

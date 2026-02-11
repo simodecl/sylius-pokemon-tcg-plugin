@@ -2,7 +2,7 @@
 
 {% block title %}Pokemon TCG - {{ card.name }}{% endblock %}
 
-{% block body %}
+{% block content %}
 <div class="container-fluid py-3">
     <a href="{{ path('simo_decl_pokemon_tcg_admin_card_search') }}" class="btn btn-outline-secondary mb-3">&larr; Back to Search</a>
 
@@ -21,15 +21,15 @@
     {% endfor %}
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             {% if card.image %}
                 <div class="card mb-3">
-                    <img src="{{ card.image }}/high.png" alt="{{ card.name }}" class="card-img-top">
+                    <img src="{{ card.image }}/high.png" alt="{{ card.name }}" class="card-img-top" style="max-height: 350px; object-fit: contain;">
                 </div>
             {% endif %}
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="card mb-3">
                 <div class="card-body">
                     <h2>{{ card.name }}</h2>
@@ -99,6 +99,50 @@
                 <div class="card-body">
                     <h5 class="card-title">Create Product</h5>
                     <p>Create a Sylius product from this card. It will be linked to the set category and have variants for each configured card language.</p>
+
+                    {% if pricing is defined and pricing|length > 0 %}
+                        <div class="alert alert-info mb-3">
+                            <strong>Market Prices (TCGdex)</strong>
+                            <div class="row mt-2">
+                                {% if pricing.cardmarket is defined %}
+                                    <div class="col-md-6">
+                                        <small class="fw-bold">Cardmarket (EUR)</small>
+                                        <table class="table table-sm table-borderless mb-0" style="font-size: 0.85rem;">
+                                            {% if pricing.cardmarket.avg is defined and pricing.cardmarket.avg %}
+                                                <tr><td class="py-0">Average</td><td class="py-0 text-end">&euro;{{ pricing.cardmarket.avg|number_format(2) }}</td></tr>
+                                            {% endif %}
+                                            {% if pricing.cardmarket.low is defined and pricing.cardmarket.low %}
+                                                <tr><td class="py-0">Low</td><td class="py-0 text-end">&euro;{{ pricing.cardmarket.low|number_format(2) }}</td></tr>
+                                            {% endif %}
+                                            {% if pricing.cardmarket.trend is defined and pricing.cardmarket.trend %}
+                                                <tr><td class="py-0">Trend</td><td class="py-0 text-end">&euro;{{ pricing.cardmarket.trend|number_format(2) }}</td></tr>
+                                            {% endif %}
+                                        </table>
+                                    </div>
+                                {% endif %}
+                                {% if pricing.tcgplayer is defined %}
+                                    <div class="col-md-6">
+                                        <small class="fw-bold">TCGplayer (USD)</small>
+                                        <table class="table table-sm table-borderless mb-0" style="font-size: 0.85rem;">
+                                            {% set tcgNormal = pricing.tcgplayer.normal is defined ? pricing.tcgplayer.normal : null %}
+                                            {% if tcgNormal is not null %}
+                                                {% set tcgPrices = tcgNormal is iterable ? tcgNormal : {} %}
+                                                {% if tcgPrices.mid is defined and tcgPrices.mid %}
+                                                    <tr><td class="py-0">Mid</td><td class="py-0 text-end">${{ tcgPrices.mid|number_format(2) }}</td></tr>
+                                                {% endif %}
+                                                {% if tcgPrices.low is defined and tcgPrices.low %}
+                                                    <tr><td class="py-0">Low</td><td class="py-0 text-end">${{ tcgPrices.low|number_format(2) }}</td></tr>
+                                                {% endif %}
+                                                {% if tcgPrices.market is defined and tcgPrices.market %}
+                                                    <tr><td class="py-0">Market</td><td class="py-0 text-end">${{ tcgPrices.market|number_format(2) }}</td></tr>
+                                                {% endif %}
+                                            {% endif %}
+                                        </table>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
 
                     <form method="post" action="{{ path('simo_decl_pokemon_tcg_admin_create_product_from_card', {cardId: card.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('pokemon_tcg_create_product') }}">

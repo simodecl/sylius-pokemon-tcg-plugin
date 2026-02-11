@@ -36,8 +36,9 @@
             <argument key="$productVariantFactory" type="service" id="sylius.factory.product_variant" />
             <argument key="$productTaxonFactory" type="service" id="sylius.factory.product_taxon" />
             <argument key="$channelPricingFactory" type="service" id="sylius.factory.channel_pricing" />
+            <argument key="$productOptionFactory" type="service" id="sylius.factory.product_option" />
+            <argument key="$productOptionValueFactory" type="service" id="sylius.factory.product_option_value" />
             <argument key="$productOptionRepository" type="service" id="sylius.repository.product_option" />
-            <argument key="$productOptionValueRepository" type="service" id="sylius.repository.product_option_value" />
             <argument key="$channelRepository" type="service" id="sylius.repository.channel" />
             <argument key="$entityManager" type="service" id="doctrine.orm.entity_manager" />
             <argument key="$defaultLocale">%locale%</argument>
@@ -51,6 +52,7 @@
             <argument key="$productVariantFactory" type="service" id="sylius.factory.product_variant" />
             <argument key="$productTaxonFactory" type="service" id="sylius.factory.product_taxon" />
             <argument key="$channelPricingFactory" type="service" id="sylius.factory.channel_pricing" />
+            <argument key="$taxonFactory" type="service" id="sylius.factory.taxon" />
             <argument key="$channelRepository" type="service" id="sylius.repository.channel" />
             <argument key="$taxonRepository" type="service" id="sylius.repository.taxon" />
             <argument key="$entityManager" type="service" id="doctrine.orm.entity_manager" />
