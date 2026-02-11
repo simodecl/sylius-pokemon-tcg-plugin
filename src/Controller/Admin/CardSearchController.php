@@ -28,7 +28,7 @@ final class CardSearchController extends AbstractController
             $cards = $this->tcgdexClient->searchCards($query);
         } elseif ($setId !== '') {
             $setData = $this->tcgdexClient->fetchSet($setId);
-            $cards = $setData['cards'] ?? [];
+            $cards = $setData !== null ? $setData->cards : [];
         }
 
         $sets = $this->tcgdexClient->fetchSets();
