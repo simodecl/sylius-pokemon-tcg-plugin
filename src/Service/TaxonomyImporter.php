@@ -10,6 +10,7 @@ use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Resource\Factory\FactoryInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Taxonomy\Generator\TaxonSlugGeneratorInterface;
+use TCGdex\Model\SetResume;
 
 /**
  * Imports Pokemon TCG series and sets from TCGdex as Sylius taxons.
@@ -50,17 +51,17 @@ final class TaxonomyImporter
 
         $allSeries = $this->tcgdexClient->fetchSeries();
 
-        foreach ($allSeries as $serieData) {
-            $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $serieData);
+        foreach ($allSeries as $serieResume) {
+            $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $serieResume->id, $serieResume->name);
             $seriesCount++;
 
-            $fullSerie = $this->tcgdexClient->fetchSerie($serieData['id']);
-            if ($fullSerie === null || !isset($fullSerie['sets'])) {
+            $fullSerie = $this->tcgdexClient->fetchSerie($serieResume->id);
+            if ($fullSerie === null) {
                 continue;
             }
 
-            foreach ($fullSerie['sets'] as $setData) {
-                $this->getOrCreateSetTaxon($serieTaxon, $setData);
+            foreach ($fullSerie->sets as $setResume) {
+                $this->getOrCreateSetTaxon($serieTaxon, $setResume);
                 $setsCount++;
             }
         }
@@ -85,18 +86,16 @@ final class TaxonomyImporter
             throw new \RuntimeException(sprintf('Series "%s" not found in TCGdex API.', $serieId));
         }
 
-        $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $fullSerie);
+        $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $fullSerie->id, $fullSerie->name);
 
-        if (isset($fullSerie['sets'])) {
-            foreach ($fullSerie['sets'] as $setData) {
-                $this->getOrCreateSetTaxon($serieTaxon, $setData);
-                $setsCount++;
-            }
+        foreach ($fullSerie->sets as $setResume) {
+            $this->getOrCreateSetTaxon($serieTaxon, $setResume);
+            $setsCount++;
         }
 
         $this->entityManager->flush();
 
-        return ['series' => $fullSerie['name'], 'sets' => $setsCount];
+        return ['series' => $fullSerie->name, 'sets' => $setsCount];
     }
 
     /**
@@ -111,7 +110,7 @@ final class TaxonomyImporter
             throw new \RuntimeException(sprintf('Set "%s" not found in TCGdex API.', $setId));
         }
 
-        $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $fullSet['serie']);
+        $serieTaxon = $this->getOrCreateSerieTaxon($rootTaxon, $fullSet->serie->id, $fullSet->serie->name);
         $setTaxon = $this->getOrCreateSetTaxon($serieTaxon, $fullSet);
 
         $this->entityManager->flush();
@@ -150,9 +149,9 @@ final class TaxonomyImporter
         return $taxon;
     }
 
-    private function getOrCreateSerieTaxon(TaxonInterface $rootTaxon, array $serieData): TaxonInterface
+    private function getOrCreateSerieTaxon(TaxonInterface $rootTaxon, string $serieId, string $serieName): TaxonInterface
     {
-        $code = $this->makeSerieTaxonCode($serieData['id']);
+        $code = $this->makeSerieTaxonCode($serieId);
 
         $existing = $this->taxonRepository->findOneBy(['code' => $code]);
         if ($existing !== null) {
@@ -164,7 +163,7 @@ final class TaxonomyImporter
         $taxon->setCode($code);
         $taxon->setCurrentLocale($this->defaultLocale);
         $taxon->setFallbackLocale($this->defaultLocale);
-        $taxon->setName($serieData['name']);
+        $taxon->setName($serieName);
         $taxon->setParent($rootTaxon);
         $taxon->setSlug($this->slugGenerator->generate($taxon, $this->defaultLocale));
 
@@ -173,9 +172,9 @@ final class TaxonomyImporter
         return $taxon;
     }
 
-    private function getOrCreateSetTaxon(TaxonInterface $serieTaxon, array $setData): TaxonInterface
+    private function getOrCreateSetTaxon(TaxonInterface $serieTaxon, SetResume $setData): TaxonInterface
     {
-        $code = $this->makeSetTaxonCode($setData['id']);
+        $code = $this->makeSetTaxonCode($setData->id);
 
         $existing = $this->taxonRepository->findOneBy(['code' => $code]);
         if ($existing !== null) {
@@ -187,15 +186,15 @@ final class TaxonomyImporter
         $taxon->setCode($code);
         $taxon->setCurrentLocale($this->defaultLocale);
         $taxon->setFallbackLocale($this->defaultLocale);
-        $taxon->setName($setData['name']);
+        $taxon->setName($setData->name);
         $taxon->setParent($serieTaxon);
         $taxon->setSlug($this->slugGenerator->generate($taxon, $this->defaultLocale));
 
-        if (isset($setData['cardCount'])) {
+        if ($setData->cardCount !== null) {
             $taxon->setDescription(sprintf(
                 'Total cards: %d | Official: %d',
-                $setData['cardCount']['total'] ?? 0,
-                $setData['cardCount']['official'] ?? 0,
+                $setData->cardCount->total ?? 0,
+                $setData->cardCount->official ?? 0,
             ));
         }
 

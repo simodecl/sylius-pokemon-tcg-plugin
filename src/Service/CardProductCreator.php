@@ -16,6 +16,7 @@ use Sylius\Component\Product\Model\ProductOptionInterface;
 use Sylius\Component\Product\Model\ProductOptionValueInterface;
 use Sylius\Component\Resource\Factory\FactoryInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
+use TCGdex\Model\Card;
 
 /**
  * Creates Sylius products from Pokemon TCG cards fetched via TCGdex.
@@ -80,8 +81,8 @@ final class CardProductCreator
         $created = 0;
         $skipped = 0;
 
-        foreach ($setData['cards'] ?? [] as $cardSummary) {
-            $fullCardId = $cardSummary['id'] ?? sprintf('%s-%s', $setId, $cardSummary['localId'] ?? '');
+        foreach ($setData->cards as $cardSummary) {
+            $fullCardId = $cardSummary->id !== '' ? $cardSummary->id : sprintf('%s-%s', $setId, $cardSummary->localId);
 
             $existingCode = $this->makeProductCode($fullCardId);
             if ($this->productRepository->findOneBy(['code' => $existingCode]) !== null) {
@@ -111,20 +112,20 @@ final class CardProductCreator
         return ['created' => $created, 'skipped' => $skipped];
     }
 
-    private function createProductFromCardData(array $cardData, ?int $defaultPriceCents): ProductInterface
+    private function createProductFromCardData(Card $cardData, ?int $defaultPriceCents): ProductInterface
     {
         /** @var ProductInterface $product */
         $product = $this->productFactory->createNew();
 
-        $code = $this->makeProductCode($cardData['id']);
+        $code = $this->makeProductCode($cardData->id);
         $product->setCode($code);
         $product->setCurrentLocale($this->defaultLocale);
         $product->setFallbackLocale($this->defaultLocale);
 
         // Build product name: "Charizard VMAX (Darkness Ablaze 020/189)"
-        $setName = $cardData['set']['name'] ?? 'Unknown Set';
-        $localId = $cardData['localId'] ?? '';
-        $cardName = $cardData['name'] ?? 'Unknown Card';
+        $setName = $cardData->set !== null ? $cardData->set->name : 'Unknown Set';
+        $localId = $cardData->localId;
+        $cardName = $cardData->name;
         $product->setName(sprintf('%s (%s %s)', $cardName, $setName, $localId));
 
         $product->setSlug($this->generateSlug($code));
@@ -149,10 +150,10 @@ final class CardProductCreator
         return $product;
     }
 
-    private function linkToSetTaxon(ProductInterface $product, array $cardData): void
+    private function linkToSetTaxon(ProductInterface $product, Card $cardData): void
     {
-        $setId = $cardData['set']['id'] ?? null;
-        if ($setId === null) {
+        $setId = $cardData->set !== null ? $cardData->set->id : null;
+        if ($setId === null || $setId === '') {
             return;
         }
 
@@ -262,38 +263,38 @@ final class CardProductCreator
         }
     }
 
-    private function buildCardDescription(array $cardData): string
+    private function buildCardDescription(Card $cardData): string
     {
         $parts = [];
 
-        if (isset($cardData['description'])) {
-            $parts[] = $cardData['description'];
+        if ($cardData->description !== null) {
+            $parts[] = $cardData->description;
         }
 
         $meta = [];
-        if (isset($cardData['rarity'])) {
-            $meta[] = sprintf('Rarity: %s', $cardData['rarity']);
+        if ($cardData->rarity !== null) {
+            $meta[] = sprintf('Rarity: %s', $cardData->rarity);
         }
-        if (isset($cardData['illustrator'])) {
-            $meta[] = sprintf('Illustrator: %s', $cardData['illustrator']);
+        if ($cardData->illustrator !== null) {
+            $meta[] = sprintf('Illustrator: %s', $cardData->illustrator);
         }
-        if (isset($cardData['category'])) {
-            $meta[] = sprintf('Category: %s', $cardData['category']);
+        if ($cardData->category !== null) {
+            $meta[] = sprintf('Category: %s', $cardData->category);
         }
-        if (isset($cardData['hp'])) {
-            $meta[] = sprintf('HP: %s', $cardData['hp']);
+        if ($cardData->hp !== null) {
+            $meta[] = sprintf('HP: %s', $cardData->hp);
         }
-        if (isset($cardData['types']) && is_array($cardData['types'])) {
-            $meta[] = sprintf('Type(s): %s', implode(', ', $cardData['types']));
+        if ($cardData->types !== null && $cardData->types !== []) {
+            $meta[] = sprintf('Type(s): %s', implode(', ', $cardData->types));
         }
-        if (isset($cardData['stage'])) {
-            $meta[] = sprintf('Stage: %s', $cardData['stage']);
+        if ($cardData->stage !== null) {
+            $meta[] = sprintf('Stage: %s', $cardData->stage);
         }
-        if (isset($cardData['set']['name'])) {
-            $meta[] = sprintf('Set: %s', $cardData['set']['name']);
+        if ($cardData->set !== null) {
+            $meta[] = sprintf('Set: %s', $cardData->set->name);
         }
-        if (isset($cardData['localId'])) {
-            $meta[] = sprintf('Card Number: %s', $cardData['localId']);
+        if ($cardData->localId !== '') {
+            $meta[] = sprintf('Card Number: %s', $cardData->localId);
         }
 
         if ($meta !== []) {
@@ -303,17 +304,17 @@ final class CardProductCreator
         return implode("\n\n", $parts);
     }
 
-    private function buildShortDescription(array $cardData): string
+    private function buildShortDescription(Card $cardData): string
     {
         $parts = [];
-        if (isset($cardData['rarity'])) {
-            $parts[] = $cardData['rarity'];
+        if ($cardData->rarity !== null) {
+            $parts[] = $cardData->rarity;
         }
-        if (isset($cardData['set']['name'])) {
-            $parts[] = $cardData['set']['name'];
+        if ($cardData->set !== null) {
+            $parts[] = $cardData->set->name;
         }
-        if (isset($cardData['localId'])) {
-            $parts[] = sprintf('#%s', $cardData['localId']);
+        if ($cardData->localId !== '') {
+            $parts[] = sprintf('#%s', $cardData->localId);
         }
 
         return implode(' | ', $parts);

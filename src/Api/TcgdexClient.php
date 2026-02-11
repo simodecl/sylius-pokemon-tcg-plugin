@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace SimoDecl\SyliusPokemonTcgPlugin\Api;
 
+use TCGdex\Model\Card;
+use TCGdex\Model\CardResume;
+use TCGdex\Model\Serie;
+use TCGdex\Model\SerieResume;
+use TCGdex\Model\Set;
+use TCGdex\Model\SetResume;
 use TCGdex\TCGdex;
 
 /**
@@ -33,112 +39,70 @@ final class TcgdexClient
     /**
      * Fetch all series.
      *
-     * @return array<int, array{id: string, name: string, logo?: string}>
+     * @return SerieResume[]
      */
     public function fetchSeries(): array
     {
-        return $this->tcgdex->fetch('series') ?? [];
+        return $this->tcgdex->fetchSeries() ?? [];
     }
 
     /**
      * Fetch a single series by ID.
-     *
-     * @return array{id: string, name: string, logo?: string, sets?: array<int, array>}|null
      */
-    public function fetchSerie(string $serieId): ?array
+    public function fetchSerie(string $serieId): ?Serie
     {
-        return $this->tcgdex->fetch('series', $serieId);
+        return $this->tcgdex->fetchSerie($serieId);
     }
 
     /**
      * Fetch all sets.
      *
-     * @return array<int, array{id: string, name: string, logo?: string, symbol?: string, cardCount?: array}>
+     * @return SetResume[]
      */
     public function fetchSets(): array
     {
-        return $this->tcgdex->fetch('sets') ?? [];
+        return $this->tcgdex->fetchSets() ?? [];
     }
 
     /**
      * Fetch a single set by ID, including its card list.
-     *
-     * @return array{id: string, name: string, logo?: string, symbol?: string, serie: array, cardCount: array, cards: array<int, array>}|null
      */
-    public function fetchSet(string $setId): ?array
+    public function fetchSet(string $setId): ?Set
     {
-        return $this->tcgdex->fetch('sets', $setId);
+        return $this->tcgdex->fetchSet($setId);
     }
 
     /**
      * Fetch a single card by its global ID (e.g., "swsh3-136").
-     *
-     * @return array{id: string, localId: string, name: string, image?: string, category?: string, illustrator?: string, rarity?: string, variants?: array, set: array, types?: array, hp?: int, stage?: string, description?: string}|null
      */
-    public function fetchCard(string $cardId): ?array
+    public function fetchCard(string $cardId): ?Card
     {
-        return $this->tcgdex->fetch('cards', $cardId);
-    }
-
-    /**
-     * Fetch a card by set ID and local card ID (e.g., set "swsh3", card "136").
-     *
-     * @return array|null
-     */
-    public function fetchCardFromSet(string $setId, string $localId): ?array
-    {
-        return $this->tcgdex->fetch('sets', $setId, $localId);
+        return $this->tcgdex->fetchCard($cardId);
     }
 
     /**
      * Fetch all cards (summary list).
      *
-     * @return array<int, array{id: string, localId: string, name: string, image?: string}>
+     * @return CardResume[]
      */
     public function fetchCards(): array
     {
-        return $this->tcgdex->fetch('cards') ?? [];
+        return $this->tcgdex->fetchCards() ?? [];
     }
 
     /**
-     * Search for cards by name using the API's filtering.
+     * Search for cards by name.
      *
-     * @return array<int, array{id: string, localId: string, name: string, image?: string}>
+     * @return CardResume[]
      */
     public function searchCards(string $query): array
     {
-        $params = ['name' => $query];
+        $results = $this->tcgdex->fetchWithParams(['cards'], ['name' => $query]);
 
-        return $this->tcgdex->fetchWithParams(['cards'], $params) ?? [];
-    }
+        if (!is_array($results)) {
+            return [];
+        }
 
-    /**
-     * Fetch available rarities.
-     *
-     * @return array<int, string>
-     */
-    public function fetchRarities(): array
-    {
-        return $this->tcgdex->fetch('rarities') ?? [];
-    }
-
-    /**
-     * Fetch available card categories.
-     *
-     * @return array<int, string>
-     */
-    public function fetchCategories(): array
-    {
-        return $this->tcgdex->fetch('categories') ?? [];
-    }
-
-    /**
-     * Fetch available pokemon types.
-     *
-     * @return array<int, string>
-     */
-    public function fetchTypes(): array
-    {
-        return $this->tcgdex->fetch('types') ?? [];
+        return $results;
     }
 }
