@@ -1,96 +1,85 @@
-{% extends '@SyliusAdmin/layout.html.twig' %}
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
 
 {% block title %}Pokemon TCG - Search Cards{% endblock %}
 
-{% block content %}
-<div class="ui segment">
-    <h1 class="ui header">
-        <i class="search icon"></i>
-        <div class="content">
-            Search Pokemon Cards
-            <div class="sub header">Search TCGdex for cards and create products</div>
+{% block body %}
+<div class="container-fluid py-3">
+    <h1 class="mb-1">Search Pokemon Cards</h1>
+    <p class="text-muted">Search TCGdex for cards and create products</p>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    </h1>
-</div>
+    {% endfor %}
 
-{% for message in app.flashes('success') %}
-    <div class="ui positive message">
-        <i class="close icon"></i>
-        <p>{{ message }}</p>
-    </div>
-{% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
 
-{% for message in app.flashes('error') %}
-    <div class="ui negative message">
-        <i class="close icon"></i>
-        <p>{{ message }}</p>
-    </div>
-{% endfor %}
-
-<div class="ui segment">
-    <form method="get" action="{{ path('simo_decl_pokemon_tcg_admin_card_search') }}" class="ui form">
-        <div class="two fields">
-            <div class="field">
-                <label>Search by card name</label>
-                <div class="ui action input">
-                    <input type="text" name="q" value="{{ query }}" placeholder="e.g., Charizard, Pikachu, Mewtwo...">
-                    <button type="submit" class="ui primary button">
-                        <i class="search icon"></i>
-                        Search
-                    </button>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('simo_decl_pokemon_tcg_admin_card_search') }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Search by card name</label>
+                        <div class="input-group">
+                            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="e.g., Charizard, Pikachu, Mewtwo...">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Or browse by set</label>
+                        <select name="set" class="form-select" onchange="this.form.submit()">
+                            <option value="">Select a set...</option>
+                            {% for set in sets %}
+                                <option value="{{ set.id }}" {% if selectedSet == set.id %}selected{% endif %}>
+                                    {{ set.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="field">
-                <label>Or browse by set</label>
-                <select name="set" class="ui dropdown" onchange="this.form.submit()">
-                    <option value="">Select a set...</option>
-                    {% for set in sets %}
-                        <option value="{{ set.id }}" {% if selectedSet == set.id %}selected{% endif %}>
-                            {{ set.name }}
-                        </option>
+            </form>
+        </div>
+    </div>
+
+    {% if cards|length > 0 %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Results ({{ cards|length }} cards found)</h5>
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+                    {% for card in cards %}
+                        <div class="col">
+                            <div class="card h-100">
+                                {% if card.image %}
+                                    <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}">
+                                        <img src="{{ card.image }}/low.png" alt="{{ card.name }}" class="card-img-top" loading="lazy">
+                                    </a>
+                                {% endif %}
+                                <div class="card-body p-2">
+                                    <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="text-decoration-none">
+                                        <strong>{{ card.name }}</strong>
+                                    </a>
+                                    <br><small class="text-muted"><code>{{ card.id }}</code></small>
+                                </div>
+                                <div class="card-footer p-2">
+                                    <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="btn btn-sm btn-outline-primary w-100">View Details</a>
+                                </div>
+                            </div>
+                        </div>
                     {% endfor %}
-                </select>
+                </div>
             </div>
         </div>
-    </form>
-</div>
-
-{% if cards|length > 0 %}
-    <div class="ui segment">
-        <h3 class="ui header">Results ({{ cards|length }} cards found)</h3>
-
-        <div class="ui five stackable cards">
-            {% for card in cards %}
-                <div class="card">
-                    {% if card.image is defined and card.image %}
-                        <div class="image">
-                            <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}">
-                                <img src="{{ card.image }}/low.png" alt="{{ card.name }}" loading="lazy">
-                            </a>
-                        </div>
-                    {% endif %}
-                    <div class="content">
-                        <a class="header" href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}">
-                            {{ card.name }}
-                        </a>
-                        <div class="meta">
-                            <code>{{ card.id }}</code>
-                        </div>
-                    </div>
-                    <div class="extra content">
-                        <a href="{{ path('simo_decl_pokemon_tcg_admin_card_view', {cardId: card.id}) }}" class="ui mini fluid button">
-                            View Details
-                        </a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-{% elseif query or selectedSet %}
-    <div class="ui segment">
-        <div class="ui info message">
+    {% elseif query or selectedSet %}
+        <div class="alert alert-info">
             No cards found. Try a different search term or set.
         </div>
-    </div>
-{% endif %}
+    {% endif %}
+</div>
 {% endblock %}
