@@ -93,7 +93,7 @@ final class TcgdexClient
     /**
      * Search for cards by name.
      *
-     * @return CardResume[]
+     * @return array<array{id: string, name: string, image: string|null}>
      */
     public function searchCards(string $query): array
     {
@@ -103,6 +103,37 @@ final class TcgdexClient
             return [];
         }
 
-        return $results;
+        return array_map(function ($item): array {
+            if ($item instanceof CardResume) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'image' => $item->image,
+                ];
+            }
+
+            // Raw stdClass from API
+            return [
+                'id' => $item->id ?? '',
+                'name' => $item->name ?? '',
+                'image' => $item->image ?? null,
+            ];
+        }, $results);
+    }
+
+    /**
+     * Fetch raw card data including pricing information.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function fetchCardRawData(string $cardId): ?array
+    {
+        $result = $this->tcgdex->fetchWithParams(['cards', $cardId], []);
+
+        if ($result === null || !is_object($result)) {
+            return null;
+        }
+
+        return (array) $result;
     }
 }

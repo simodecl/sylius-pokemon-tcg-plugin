@@ -2,7 +2,7 @@
 
 {% block title %}Pokemon TCG - Add Sealed Product{% endblock %}
 
-{% block body %}
+{% block content %}
 <div class="container-fluid py-3">
     <h1 class="mb-1">Add Sealed Product</h1>
     <p class="text-muted">Create a sealed Pokemon TCG product (booster boxes, packs, tins, etc.)</p>
@@ -21,7 +21,7 @@
         </div>
     {% endfor %}
 
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-body">
             {{ form_start(form) }}
 
@@ -40,11 +40,8 @@
 
                 <div class="col-md-6">
                     {{ form_label(form.set_id, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.set_id, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_widget(form.set_id, {'attr': {'class': 'form-select'}}) }}
                     {{ form_errors(form.set_id) }}
-                    <div class="form-text">
-                        Enter the TCGdex set ID. You can find set IDs on the <a href="{{ path('simo_decl_pokemon_tcg_admin_import_taxonomies') }}">Import Categories</a> page.
-                    </div>
                 </div>
             </div>
 
@@ -63,17 +60,6 @@
             <button type="submit" class="btn btn-primary">Create Sealed Product</button>
 
             {{ form_end(form) }}
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Common Sealed Product Types</h5>
-            <ul class="list-group list-group-flush">
-                {% for typeKey, typeLabel in productTypes %}
-                    <li class="list-group-item"><strong>{{ typeLabel }}</strong></li>
-                {% endfor %}
-            </ul>
         </div>
     </div>
 </div>

@@ -50,8 +50,16 @@ final class CardSearchController extends AbstractController
             return $this->redirectToRoute('simo_decl_pokemon_tcg_admin_card_search');
         }
 
+        $rawData = $this->tcgdexClient->fetchCardRawData($cardId);
+        $pricing = [];
+        if ($rawData !== null && isset($rawData['pricing'])) {
+            // Recursively convert stdClass to arrays
+            $pricing = json_decode(json_encode($rawData['pricing']), true) ?? [];
+        }
+
         return $this->render('@SimoDeclSyliusPokemonTcgPlugin/admin/pokemon_tcg/card_view.html.twig', [
             'card' => $cardData,
+            'pricing' => $pricing,
         ]);
     }
 
@@ -59,6 +67,7 @@ final class CardSearchController extends AbstractController
     {
         $defaultPrice = $request->request->getInt('default_price', 0);
         $priceCents = $defaultPrice > 0 ? $defaultPrice : null;
+        $referer = $request->headers->get('referer', '');
 
         try {
             $product = $this->cardProductCreator->createFromCard($cardId, $priceCents);
@@ -67,11 +76,21 @@ final class CardSearchController extends AbstractController
                 $product->getName(),
             ));
 
+            // If created from search page, redirect back to search
+            if (str_contains($referer, 'cards') && !str_contains($referer, $cardId)) {
+                return $this->redirect($referer);
+            }
+
             return $this->redirectToRoute('sylius_admin_product_update', [
                 'id' => $product->getId(),
             ]);
         } catch (\Throwable $e) {
             $this->addFlash('error', sprintf('Failed to create product: %s', $e->getMessage()));
+
+            // If created from search page, redirect back to search
+            if (str_contains($referer, 'cards') && !str_contains($referer, $cardId)) {
+                return $this->redirect($referer);
+            }
 
             return $this->redirectToRoute('simo_decl_pokemon_tcg_admin_card_view', [
                 'cardId' => $cardId,

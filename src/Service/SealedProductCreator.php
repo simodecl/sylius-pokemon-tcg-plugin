@@ -58,6 +58,7 @@ final class SealedProductCreator
         private readonly FactoryInterface $productVariantFactory,
         private readonly FactoryInterface $productTaxonFactory,
         private readonly FactoryInterface $channelPricingFactory,
+        private readonly FactoryInterface $taxonFactory,
         private readonly RepositoryInterface $channelRepository,
         private readonly RepositoryInterface $taxonRepository,
         private readonly EntityManagerInterface $entityManager,
@@ -141,7 +142,7 @@ final class SealedProductCreator
             }
 
             /** @var TaxonInterface $sealedTaxon */
-            $sealedTaxon = $this->taxonRepository->createNew();
+            $sealedTaxon = $this->taxonFactory->createNew();
             $sealedTaxon->setCode($sealedTaxonCode);
             $sealedTaxon->setCurrentLocale($this->defaultLocale);
             $sealedTaxon->setFallbackLocale($this->defaultLocale);

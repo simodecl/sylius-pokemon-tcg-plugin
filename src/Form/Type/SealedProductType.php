@@ -34,12 +34,11 @@ final class SealedProductType extends AbstractType
                     new Assert\NotBlank(),
                 ],
             ])
-            ->add('set_id', TextType::class, [
+            ->add('set_id', ChoiceType::class, [
                 'label' => 'simo_decl_pokemon_tcg.form.sealed_product.set',
                 'required' => false,
-                'attr' => [
-                    'placeholder' => 'e.g., sv03, swsh12, etc.',
-                ],
+                'choices' => $options['set_choices'],
+                'placeholder' => 'Select a set (optional)...',
             ])
             ->add('price', NumberType::class, [
                 'label' => 'simo_decl_pokemon_tcg.form.sealed_product.price',
@@ -63,6 +62,7 @@ final class SealedProductType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => null,
+            'set_choices' => [],
         ]);
     }
 

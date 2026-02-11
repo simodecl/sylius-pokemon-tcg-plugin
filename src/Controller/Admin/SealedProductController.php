@@ -21,7 +21,16 @@ final class SealedProductController extends AbstractController
 
     public function createAction(Request $request): Response
     {
-        $form = $this->createForm(SealedProductType::class);
+        $sets = $this->tcgdexClient->fetchSets();
+
+        $setChoices = [];
+        foreach ($sets as $set) {
+            $setChoices[$set->name] = $set->id;
+        }
+
+        $form = $this->createForm(SealedProductType::class, null, [
+            'set_choices' => $setChoices,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -49,12 +58,8 @@ final class SealedProductController extends AbstractController
             }
         }
 
-        $sets = $this->tcgdexClient->fetchSets();
-
         return $this->render('@SimoDeclSyliusPokemonTcgPlugin/admin/pokemon_tcg/sealed_product.html.twig', [
             'form' => $form->createView(),
-            'sets' => $sets,
-            'productTypes' => SealedProductCreator::PRODUCT_TYPES,
         ]);
     }
 }
